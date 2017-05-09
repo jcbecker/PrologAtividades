@@ -1,5 +1,6 @@
 /*Nome: João Carlos Becker  Trabalho3 tópicos em inteligência artificial
-
+Executar testall.
+para testar todo o trabalho requisitado
 
 Fazer um banco de dados que modele a estrutura de uma faculdade com professores,
 alunos, e disciplinas com seus respectivos horários.
@@ -121,9 +122,18 @@ hcpa(P, A, L):-hrdoprofessor(P, Plist), hrdoaluno(A, Alist), intersection(Alist,
 %Horarios livres em comum entre um professor P e um aluno A, hlcpa(P, A, ResulList).
 hlcpa(P, A, L):-freehp(P, Plist), freeha(A, Alist), intersection(Alist, Plist, L).
 
-%Quantas desciplinas são ministradas na parte da manhã
+%Quantas(N) desciplinas são ministradas na parte da manhã, hmmatutino(N).
 hmmatutino(N):-findall(Disc, (disciplina(Disc, _, _, Hr),horarioTeste(Hr)), L),length(L, N). 
 horarioTeste([X|_]):-X<10, !.
 horarioTeste([_|T]):-horarioTeste(T).
 
+%Quantidade(N) de disciplinas no noturno, hmnoturno(N).
+hmnoturno(N):-findall(Disc, (disciplina(Disc, _, _, Hr),horarioTeste2(Hr)), L),length(L, N). 
+horarioTeste2([X|_]):-X>19, !.
+horarioTeste2([_|T]):-horarioTeste2(T).
 
+%Imprime lista de matérias no matutino
+printmatutino:-findall(Disc, (disciplina(Disc, _, _, Hr),horarioTeste(Hr)), L),write(L). 
+
+%Imprime lista de matérias no noturno
+printnoturno:-findall(Disc, (disciplina(Disc, _, _, Hr),horarioTeste2(Hr)), L), write(L). 
