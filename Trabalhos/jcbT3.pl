@@ -66,7 +66,7 @@ hr(20). hr(21). hr(22). hr(23). hr(24). hr(25). hr(26). hr(27). hr(28). hr(29).
 
 
 %disciplina('Disciplina', Professor(SIAP), [A1, A2, ..., AN](Alunos), [H1, H2]).
-disciplina('Comp. Dist.', 1, [1411100040, 1411100022, 1411100001],[0, 5]).
+disciplina('Comp. Dist.', 1, [1411100040, 1411100022, 1411100001, 4],[0, 5]).
 disciplina('IA', 2, [1411100040, 1411100022, 1411100001, 1411100015],[1, 8]).
 disciplina('OptII', 4, [1, 2, 3, 1411100001],[2, 3]).
 disciplina('OptI', 5, [3, 1411100001, 1411100040, 1411100022],[4, 9]).
@@ -78,21 +78,22 @@ disciplina('OptIII', 2, [1, 5, 6, 1411100001, 1411100040, 1411100022],[22, 23]).
 %Testa tudo---------------------------------------------------------------------
 testall:-write('Imprimindo todos alunos e suas respectivas disciplinas:'), nl, printallalunos,nl, nl,
     write('Imprimindo todos professores e suas respectivas disciplinas:'), nl, printprofessores, nl, nl,
-    write('Os horários disponíveis de cada professor são: '),nl,  printProfessoresLivres, nl, nl.
+    write('Os horários disponíveis de cada professor são: '),nl,  printProfessoresLivres, nl, nl,
+    write('Os alunos com seus horários livres: '), nl, printAlunosLivres, nl, nl.
 
 
 
 
-printallalunos:-forall(aluno(A, _), alunoassiste(A)).
+printallalunos:-forall(aluno(A, Nome), (write(Nome), write(' assiste as disciplinas: '), alunoassiste(A, Dlist), write(Dlist), nl      )).
 
 printprofessores:-forall(professor(A, _), professorleciona(A)).
 
 printProfessoresLivres:- forall(professor(P, Nome), (write('Professor '),write(Nome), write(' Tem livre os horários :'),freehp(P, L), write(L), nl)).
 
+printAlunosLivres:- forall(aluno(A, Nome), (write('Aluno '),write(Nome), write(' Tem livre os horários :'),freeha(A, L), write(L), nl)).
+
 %Quais disciplinas um professor/aluno leciona/assiste
-alunoassiste(X):- aluno(X, Nome), write(Nome), write(' assiste as disciplinas: '), forall(disciplina(Disc, _, As, _), alunoassiste(Disc, X, As)), nl.
-alunoassiste(Disc, X, As):-member(X, As), write(Disc), write(', ').
-alunoassiste(_, _, _).
+alunoassiste(X, Dlist):- aluno(X, _), findall(Disc, (disciplina(Disc, _, As, _), member(X, As)), Dlist).
 
 professorleciona(X):- professor(X, Nome), write(Nome), write(' leciona as disciplinas: '), forall(disciplina(Disc, P, _, _), professorleciona(Disc, X, P)), nl.
 professorleciona(Disc,X, X):-write(Disc), write(', ').
@@ -104,3 +105,6 @@ freehp(P, O):-hrdoprofessor(P, L), freehorarios(L, O).
 hrdoprofessor(P, L):- findall(Hr, disciplina(_, P, _, Hr), Ca), flatten(Ca, L).
 freehorarios(Lin, Lout):-findall(A , hr(A), L), subtract(L, Lin, Lout).
 
+%Horarios livres para cada aluno A, freeha(A, FreeList).
+freeha(A, O):-hrdoaluno(A, L), freehorarios(L, O).
+hrdoaluno(X, L):- findall(Hr, (disciplina(_, _, Alist, Hr), member(X, Alist)), Ca), flatten(Ca, L).
