@@ -2,13 +2,9 @@
 Nome: João Carlos Becker
 Para começar a jogar use o comando start.
 Observação: start. só pode ser usado uma vez
+Para ter uma noção de como ficou a arvore de resultado após terminar o jogo pode usar o comando listing(tnode).
 */
 
-
-animal('gorila').
-animal('gato').
-animal('cachorro').
-animal('chinchila').
 
 ask(animal(X)):- write('Seu animal é um(a) '), ask(mreadyw(X)).
 ask(feature(X)):- write('Seu animal '), ask(mreadyw(X)).
@@ -34,7 +30,8 @@ mysolve(ID):- tnode(ID, animal(X), nil, nil),
     retract(tnode(ID, animal(X), nil, nil)).
 
 
-%tnode('é mamifero', animal('vaca'), animal('crocodilo')).
+%Base de dados inicial, para iniciar apenas com gorila excuir tnodes abaixo e escrever tnode(0, animal('gorila'), nil, nil).
+%tnode(ID, Info, NoChild, Yeschild).
 tnode(0, feature('é domestico'), 1, 2).%is root
 tnode(1, feature('é ave'), 3, 4).
 tnode(2, feature('é felino'), 5, 6).
