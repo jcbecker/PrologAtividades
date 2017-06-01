@@ -1,0 +1,9 @@
+tnode(0,feature('é domestico'),1,2).
+tnode(1,feature('é ave'),3,4).
+tnode(2,feature('é felino'),5,6).
+tnode(3,animal(gorila),nil,nil).
+tnode(5,animal(cachorro),nil,nil).
+tnode(6,animal(gato),nil,nil).
+tnode(4,feature('tem penas pretas'),15,16).
+tnode(15,animal(gaivota),nil,nil).
+tnode(16,animal(corvo),nil,nil).
