@@ -37,22 +37,23 @@ mWriteDB:-write('Escrevendo jogadas na base de dados'), nl.
 play(J1, N, T) :-
 	boardPrint(T),
 	le_jog(N,J1,T,P1), executa(J1,P1,T,T1),
-	(fim(N, J1, T1) | changeTurn(J1,J2), N1 is N + 1,
+	(gameOverTest(N, J1, T1) | changeTurn(J1,J2), N1 is N + 1,
 	 play(J2,N1,T1)), !.
 
 le_jog(N, J, T, P):-
-	repeat, write_lista(['Jogada ', N, ' - Jogador ', J,	': ']),
-	le_pos(P), membro_nro(1,P,T,v), !.
+	repeat, mWriteList(['Jogada ', N, ' - Jogador ', J,	': ']),
+	mReadPosition(P), isFree(1,P,T,v), !.
 
-membro_nro(N,N,[X|R],X) :- !.
-membro_nro(N,L,[Y|R],X) :- N1 is N + 1, membro_nro(N1,L,R,X), !.
 
-le_pos(P):-
+isFree(N,N,[X|_],X) :- !.%verefica se na posição N do tabuleiro tem um 'v'
+isFree(N,L,[_|R],X) :- N1 is N + 1, isFree(N1,L,R,X), !.
+
+mReadPosition(P):-
 	repeat, get_single_char(C), put(C), nl, number_codes(P,[C]),
 	P >= 1, P =< 9, !.
 
-write_lista([]):-!.
-write_lista([X|R]):- write(X), write_lista(R), !.
+mWriteList([]):-!.
+mWriteList([X|R]):- write(X), mWriteList(R), !.
 
 executa(J,P,T1,T2):- substitui(1,P,J,T1,T2), !.
 
@@ -74,9 +75,9 @@ cellPrint(v):- write(' '), !.
 cellPrint(player):- write('X'), !.
 cellPrint(computer):- write('O'), !.
 
-fim(N,J,T):- victoryTest(J,T), write_lista(['Vitória do ', J, '!']), nl,
+gameOverTest(_,J,T):- victoryTest(J,T), mWriteList(['Vitória do ', J, '!']), nl,
 	boardPrint(T), !.
-fim(9,_,_):- victoryTest(J,T), write('Empate !'), nl, !.
+gameOverTest(9,_,_):- victoryTest(J,T), write('Empate !'), nl, !.
 
 
 %victoryTest 
