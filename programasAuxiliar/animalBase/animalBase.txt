@@ -3,7 +3,10 @@ tnode(1,feature('é ave'),3,4).
 tnode(2,feature('é felino'),5,6).
 tnode(3,animal(gorila),nil,nil).
 tnode(5,animal(cachorro),nil,nil).
-tnode(6,animal(gato),nil,nil).
 tnode(4,feature('tem penas pretas'),15,16).
-tnode(15,animal(gaivota),nil,nil).
 tnode(16,animal(corvo),nil,nil).
+tnode(15,feature('tem crista'),15,16).
+tnode(16,animal(calopsita),nil,nil).
+tnode(6,feature('gosta de água'),17,18).
+tnode(17,animal(gato),nil,nil).
+tnode(18,animal('lontra doméstica'),nil,nil).
