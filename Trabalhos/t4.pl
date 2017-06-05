@@ -3,6 +3,7 @@ Nome: João Carlos Becker
 Para começar a jogar use o comando start.
 Observação: start. só pode ser usado uma vez
 Para ter uma noção de como ficou a arvore de resultado após terminar o jogo pode usar o comando listing(tnode).
+set_flag funciona apenas em versão mais recentes, versão usada para codar 7.4.2
 */
 
 
@@ -44,8 +45,8 @@ rtree(nil):-write('Fim de arvore! Algo deu errado'), nl.
 rtree(ID):-tnode(ID, feature(X), N, Y), ask(feature(X)), read(R), ((R == sim ; R == s) -> rtree(Y); rtree(N)).
 rtree(ID):-tnode(ID, animal(X), _, _), ask(animal(X)), read(R), ((R == sim ; R == s) -> win; lost(ID)).
 
-
-start:-set_flag(my_id, 15),%Observação quando mudar a base de dados inicial, precisamos atualizar este valor
+%set_flag só funciona em versões mais recentes do swipl
+start:-flag(my_id, _, 15),%Observação quando mudar a base de dados inicial, precisamos atualizar este valor
     repeat,
         play,
     write('Você não pode usar o comando start. novamente, precisa sair do swipl e começar outro jogo com uma nova base de dados!'), nl, !.

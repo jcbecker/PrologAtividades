@@ -3,11 +3,15 @@ Alunos: João Becker e Marco Puton
 Comando para começar a jogar: start.
 
 
-
 */
 
 start:- joga(1,1,[v,v,v,v,v,v,v,v,v]), !.
 
+
+
+
+
+loadDB:-.%Função que carrega a base de dados
 
 joga(J1, N, T) :-
 	imprime_tabuleiro(T),
