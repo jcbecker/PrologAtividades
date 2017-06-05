@@ -19,7 +19,7 @@ start:-%loadDB,
 
 
 %loadDB Predicado que carrega a base de dados
-loadDB:-open('animalBase.txt', read, S),repeat, mReadLine(S), close(S), !.%DEBUG: cor estranha no mReadLine, e trocar nome do arquivo
+loadDB:-open('animalBase.txt', read, S),repeat, mReadLine(S), close(S), !.%DEBUG:trocar nome do arquivo
 mReadLine(S):-read(S, In),(In=end_of_file | assert(In), fail).
 
 printOptions:-write('Bem vindo ao jogo da velha!\nPara selecionar uma célula de jogada, pressione o número da célula\n'),
@@ -40,9 +40,14 @@ play(J1, N, T) :-
 	(gameOverTest(N, J1, T1) | changeTurn(J1,J2), N1 is N + 1,
 	 play(J2,N1,T1)), !.
 
-le_jog(N, J, T, P):-
-	repeat, mWriteList(['Jogada ', N, ' - Jogador ', J,	': ']),
+le_jog(N, player, T, P):-
+	repeat, mWriteList(['Jogada ', N, ' - vez do player: ']),
 	mReadPosition(P), isFree(1,P,T,v), !.
+
+le_jog(N, computer, T, P):-
+	repeat, mWriteList(['Jogada ', N, ' - vez do computador: ']),
+	%mReadPosition(P), isFree(1,P,T,v), !.
+	freeList(T, L), !.
 
 
 isFree(N,N,[X|_],X) :- !.%verefica se na posição N do tabuleiro tem um 'v'
@@ -54,6 +59,10 @@ mReadPosition(P):-
 
 mWriteList([]):-!.
 mWriteList([X|R]):- write(X), mWriteList(R), !.
+
+%Aqui vai a jogada do pc
+
+
 
 executa(J,P,T1,T2):- substitui(1,P,J,T1,T2), !.
 
