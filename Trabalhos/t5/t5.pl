@@ -46,8 +46,13 @@ le_jog(N, player, T, P):-
 
 le_jog(N, computer, T, P):-
 	repeat, mWriteList(['Jogada ', N, ' - vez do computador: ']),
-	%mReadPosition(P), isFree(1,P,T,v), !.
-	freeList(T, L), !.
+	nl, random(1, 10, P), isFree(1,P,T,v), fitnessList(T, L), write(L), nl, nl, !.
+	%write(T), !.
+
+fitnessList(T, L):-fitnessList(T, [], L).
+fitnessList([], A, A).
+fitnessList([v|R], A, L):- write('1 '), write(R), nl, write(A), nl, append(A, 1, A1), fitnessList(R, A1, L).
+fitnessList([_|R], A, L):- write('2 '), write(R), nl, write(A), nl, append(A, -1, A1), fitnessList(R, A1, L).
 
 
 isFree(N,N,[X|_],X) :- !.%verefica se na posição N do tabuleiro tem um 'v'
