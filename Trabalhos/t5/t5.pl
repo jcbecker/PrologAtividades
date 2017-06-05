@@ -2,22 +2,42 @@
 Alunos: João Becker e Marco Puton
 Comando para começar a jogar: start.
 
-
+Usando tabuleiro como uma lista de 9 posições representado por
+(1) | (2) | (3)
+(4) | (5) | (6)
+(7) | (8) | (9)
 */
 
-start:- joga(1,1,[v,v,v,v,v,v,v,v,v]), !.
+start:-%loadDB,
+	printOptions,
+	repeat,
+		play(1,1,[v,v,v,v,v,v,v,v,v]),
+		gameover,
+	mWriteDB, !.
 
 
 
 
+%loadDB Predicado que carrega a base de dados
+loadDB:-open('animalBase.txt', read, S),repeat, mReadLine(S), close(S), !.%DEBUG: cor estranha no mReadLine, e trocar nome do arquivo
+mReadLine(S):-read(S, In),(In=end_of_file | assert(In), fail).
 
-loadDB:-.%Função que carrega a base de dados
+printOptions:-write('Bem vindo ao jogo da velha!\nPara selecionar uma célula de jogada, pressione o número da célula\n'),
+	write('Tabuleiro neste formato:'),nl,
+	write('(1) | (2) | (3)\n(4) | (5) | (6)\n(7) | (8) | (9)'),nl.
 
-joga(J1, N, T) :-
-	imprime_tabuleiro(T),
+
+gameover:-write('Deseja continuar jogando? Pressione \'s\' para sim, outra letra caso contrário: '), get_single_char(C), put(C), nl,
+	char_code(D, C),
+    ((D == 's') -> fail; true).
+
+mWriteDB:-write('Escrevendo jogadas na base de dados'), nl.
+
+play(J1, N, T) :-
+	boardPrint(T),
 	le_jog(N,J1,T,P1), executa(J1,P1,T,T1),
 	(fim(N, J1, T1) | proximo(J1,J2), N1 is N + 1,
-	 joga(J2,N1,T1)), !.
+	 play(J2,N1,T1)), !.
 
 le_jog(N, J, T, P):-
 	repeat, write_lista(['Jogada ', N, ' - Jogador ', J,	': ']),
@@ -43,11 +63,11 @@ proximo(1,2).
 proximo(2,1).
 
 
-imprime_tabuleiro([X,Y,Z]):- imp(X), imp(s),
+boardPrint([X,Y,Z]):- imp(X), imp(s),
 	imp(Y), imp(s), imp(Z), nl, nl,!.
-imprime_tabuleiro([X,Y,Z|R]):- imp(X), imp(s),
+boardPrint([X,Y,Z|R]):- imp(X), imp(s),
 	imp(Y), imp(s), imp(Z), nl, imp(l),
-	imprime_tabuleiro(R), !.
+	boardPrint(R), !.
 
 imp(v):- write(' '), !.
 imp(1):- write('X'), !.
@@ -56,7 +76,7 @@ imp(s):- write(' | '), !.
 imp(l):- write('---------'),nl, !.
 
 fim(N,J,T):- victoryTest(J,T), write_lista(['Vitória do Jogador', J, '!']), nl,
-	imprime_tabuleiro(T), !.
+	boardPrint(T), !.
 fim(9,_,_):- victoryTest(J,T), write('Empate !'), !.
 
 
