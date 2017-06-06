@@ -11,7 +11,7 @@ Usando tabuleiro como uma lista de 9 posições representado por
 start:-%loadDB,
 	printOptions,
 	repeat,
-		play(player,1,[v,v,v,v,v,v,v,v,v]),
+		play(player,1,[v,v,v,v,v,v,v,v,v], [player]),
 		gameover,
 	mWriteDB, !.
 
@@ -34,28 +34,49 @@ gameover:-%DEBUG: aqui preciso salvar no banco de dados o resultado
 
 mWriteDB:-write('Escrevendo jogadas na base de dados'), nl.
 
-play(J1, N, T) :-
-	boardPrint(T),
-	le_jog(N,J1,T,P1), executa(J1,P1,T,T1),
-	(gameOverTest(N, J1, T1) | changeTurn(J1,J2), N1 is N + 1,
-	 play(J2,N1,T1)), !.
+%H: uma lista com o histórico das jogadas, na partida atual
+play(J1, N, T, H) :-
+	boardPrint(T),%DEBUG: passa para o makeMove do player
+	makeMove(N,J1,T,P1),
+	append(H, [P1], H1),
+	executa(J1,P1,T,T1),
+	(gameOverTest(N, J1, T1, H1) | changeTurn(J1,J2), N1 is N + 1,
+	 play(J2,N1,T1, H1)), !.
 
-le_jog(N, player, T, P):-
+makeMove(N, player, T, P):-
 	repeat, mWriteList(['Jogada ', N, ' - vez do player: ']),
 	mReadPosition(P), isFree(1,P,T,v), !.
 
-le_jog(N, computer, T, P):-
-	repeat, mWriteList(['Jogada ', N, ' - vez do computador: ']),
-	nl, random(1, 10, P), isFree(1,P,T,v), fitnessList(T, L), write(L), nl, nl, !.
+makeMove(N, computer, T, P):-
+	repeat, mWriteList(['Jogada ', N, ' - vez do computador: ']), nl,
+	fitnessList(T, L),
+	length(L, U),
+	random(0, U, Rnd),
+	nth0(Rnd,L,[F, P]),
+	
+	isFree(1,P,T,v), 
+	nl, !.
 	%write(T), !.
 
-fitnessList(T, L):-fitnessList(T, [], L).
-fitnessList([], A, A).
-fitnessList([v|R], A, L):- write('1 '), write(R), nl, write(A), nl, append(A, 1, A1), fitnessList(R, A1, L).
-fitnessList([_|R], A, L):- write('2 '), write(R), nl, write(A), nl, append(A, -1, A1), fitnessList(R, A1, L).
+fitnessList(T, L):-fitnessList(T, [], 1, L).
+fitnessList([], A, _, P):- mCutList(A, P).
+fitnessList([v|R], A, N, L):-append(A, [[0.5, N]], A1),N1 is N+1, fitnessList(R, A1, N1, L).%DEBUG: aqui preciso calcular fitness
+fitnessList([_|R], A, N, L):-append(A, [[-1, N]], A1),N1 is N+1, fitnessList(R, A1, N1, L).
+
+mCutList(L, P):-mMaxList(L, M),
+	%mWriteList(['Na lista ', L, ' A maior fitness é: ', M]),
+	doCut(L, M, P).
 
 
-isFree(N,N,[X|_],X) :- !.%verefica se na posição N do tabuleiro tem um 'v'
+mMaxList(L, N):- mMaxList(L,-5, N).%Predicado que procura a maior fitness na lista de [Fitness, Posição]
+mMaxList([], A, A).
+mMaxList([[F, _]|R], A, N):- ((F > A) -> mMaxList(R, F, N); mMaxList(R, A, N)).
+
+doCut(L, M, Cuted):- doCut(L, M, Cuted, []).%faz o corte na lista, removendo posições com fitness baixas
+doCut([], M, A, A).
+doCut([[F, P]|R], M, Cuted, A):- ((F < M) -> append(A, [], A1); append(A, [[F, P]], A1)), doCut(R, M, Cuted, A1).
+
+isFree(N,N,[X|_],X) :- !.%verefica se na posição N do tabuleiro tem X
 isFree(N,L,[_|R],X) :- N1 is N + 1, isFree(N1,L,R,X), !.
 
 mReadPosition(P):-
@@ -64,10 +85,6 @@ mReadPosition(P):-
 
 mWriteList([]):-!.
 mWriteList([X|R]):- write(X), mWriteList(R), !.
-
-%Aqui vai a jogada do pc
-
-
 
 executa(J,P,T1,T2):- substitui(1,P,J,T1,T2), !.
 
@@ -89,9 +106,12 @@ cellPrint(v):- write(' '), !.
 cellPrint(player):- write('X'), !.
 cellPrint(computer):- write('O'), !.
 
-gameOverTest(_,J,T):- victoryTest(J,T), mWriteList(['Vitória do ', J, '!']), nl,
-	boardPrint(T), !.
-gameOverTest(9,_,_):- victoryTest(J,T), write('Empate !'), nl, !.
+gameOverTest(_, J, T, H):- victoryTest(J,T), mWriteList(['Vitória do ', J, '!']), nl,
+	boardPrint(T),
+	assert(played(H, J)), !.
+gameOverTest(9,_,_, H):- victoryTest(J,T), write('Empate !'), nl,
+	assert(played(H, tie)),
+	!.%DEBUG: isso não faz muito sentido
 
 
 %victoryTest 
