@@ -7,6 +7,10 @@ Usando tabuleiro como uma lista de 9 posições representado por
 (4) | (5) | (6)
 (7) | (8) | (9)
 */
+:- dynamic
+      played/2,
+	  start.
+
 
 start:-%loadDB,
 	printOptions,
@@ -37,19 +41,19 @@ mWriteDB:-write('Escrevendo jogadas na base de dados'), nl.
 %H: uma lista com o histórico das jogadas, na partida atual
 play(J1, N, T, H) :-
 	boardPrint(T),%DEBUG: passa para o makeMove do player
-	makeMove(N,J1,T,P1),
+	makeMove(N,J1,T,P1, H),
 	append(H, [P1], H1),
 	executa(J1,P1,T,T1),
 	(gameOverTest(N, J1, T1, H1) | changeTurn(J1,J2), N1 is N + 1,
 	 play(J2,N1,T1, H1)), !.
 
-makeMove(N, player, T, P):-
+makeMove(N, player, T, P, _):-
 	repeat, mWriteList(['Jogada ', N, ' - vez do player: ']),
 	mReadPosition(P), isFree(1,P,T,v), !.
 
-makeMove(N, computer, T, P):-
+makeMove(N, computer, T, P, Ahist):-
 	repeat, mWriteList(['Jogada ', N, ' - vez do computador: ']), nl,
-	fitnessList(T, L),
+	fitnessList(T, L, Ahist),
 	length(L, U),
 	random(0, U, Rnd),
 	nth0(Rnd,L,[F, P]),
@@ -58,10 +62,32 @@ makeMove(N, computer, T, P):-
 	nl, !.
 	%write(T), !.
 
-fitnessList(T, L):-fitnessList(T, [], 1, L).
-fitnessList([], A, _, P):- mCutList(A, P).
-fitnessList([v|R], A, N, L):-append(A, [[0.5, N]], A1),N1 is N+1, fitnessList(R, A1, N1, L).%DEBUG: aqui preciso calcular fitness
-fitnessList([_|R], A, N, L):-append(A, [[-1, N]], A1),N1 is N+1, fitnessList(R, A1, N1, L).
+%Ahist: histórico de jogadas na partida atual
+fitnessList(T, L, Ahist):-fitnessList(T, [], 1, L, Ahist).
+fitnessList([], A, _, P, _):- mCutList(A, P) 
+	,write('Sem Corte: '), write(A), nl, write('Com corte: '), write(P), nl
+	.
+fitnessList([v|R], A, N, L, Ahist):-
+	append(Ahist, [N], AhistN),
+	fitnessCalc(AhistN, Fit),
+	append(A, [[Fit, N]], A1),
+	N1 is N+1,
+	fitnessList(R, A1, N1, L, Ahist).%DEBUG: aqui preciso calcular fitness
+fitnessList([_|R], A, N, L, Ahist):-
+	append(A, [[-1, N]], A1),
+	N1 is N+1,
+	fitnessList(R, A1, N1, L, Ahist).
+
+
+fitnessCalc(L, Fit):-
+	write('Calculando Fit, Hist: '), write(L),nl,
+	findall(played(X, Y) , (played(X, Y), prefix(L, X)), OutList),
+	write('Prefixos: '), write(OutList),
+	length(OutList, N),
+	((N == 0) -> Fit is 0.5; Fit is 2),
+	nl.
+
+
 
 mCutList(L, P):-mMaxList(L, M),
 	%mWriteList(['Na lista ', L, ' A maior fitness é: ', M]),
