@@ -1,3 +1,15 @@
+/*
+	Alunos: Joao Carlos Bercker,
+			Marco Aurelio Alves Puton
+
+	Para rodar o programa, chame buscalargura(Inicio, L).
+	Inicio e o ponto de inicio da busca. Ex.: 'A'
+	L e o retorno da chamada, contendo a resposta no formato: (Caminho, Custo)
+	No termino da execucao, antes de exibir a solucao, e mostrado como ficou a
+	arvore de solucao antes de selecionar a resposta com menor custo.
+*/
+
+
 % BD
 distancia('POA', 'FLO', 457).
 distancia('POA', 'Ctba', 741).
@@ -67,6 +79,11 @@ isSubset([H|T], Y) :- 		member(H, Y),
 							select(H, Y, Z),
 							isSubset(T,Z), !.
 
+equal2((X, _), (Y, _)) :- equivale(X, Y), !.
+
+equivale([], []) :- !.
+equivale([H|T], Y) :- member(H, Y), subtract(Y, [H], Y2), equivale(T, Y2), !.
+
 
 %	Funcao de poda.
 %	Percorre a lista de caminhos, e vai adicionando em uma nova lista
@@ -82,16 +99,15 @@ poda([H|T], L, R) :- inList(H, L, M), maior(H, M, Maior), substitui(H, M, Maior,
 %	Substitui o caminho da lista quando equivalentes.
 %	Se o da nova lista tiver custo maior (1), troca pelo novo
 substitui(H, M, 1, L, NL) :- subtract(L, [M], L2), append(L2, [H], NL), !.
-%	Se o caminho da lista é o menor (2), deixa como está.
+%	Se o caminho da lista e o menor (2), deixa como esta.
 substitui(_, _, 2, L, L) :- !.
 
 %	Retorna 1 quando o caminho da lista maior que o caminho novo, e 2 caso contrario
 maior((_, C1), (_, C2), 1) :- C1 < C2, !.
 maior((_, _), (_, _), 2) :- !.
 
-%	Testa se o caminho já está na lista (Caminho equivalente). Testa para todos
+%	Testa se o caminho ja esta na lista (Caminho equivalente). Testa para todos
 %	os indices da lista nova.
-inList(I, [H|T], M) :- not(equal(I, H)), inList(I, T, M), !.
 inList(([Head|Tail], _), [([Head2|Tail2], W)|_], ([Head2|Tail2], W)) :- Head = Head2,
 																		last(Tail, Last1),
 																		last(Tail2, Last2),
@@ -133,20 +149,22 @@ expande([H|T], ([H2|T2], C), L, In) :-	append([H], [H2|T2], NL),
 buscalargura(Inicio, L) :- buscalarguraa(Inicio, [([Inicio], 0)], L, [a]), !.
 
 
-buscalarguraa(_, RES, Resposta, []) :- write_list(["\n\nAcabou com: ", RES]), menor(RES, Resposta), !.
+buscalarguraa(_, RES, Resposta, []) :- menor(RES, Resposta), !.
 
 %	Expande o topo e insere no final, faz a poda e continua pro resto da lista.
 buscalarguraa(Inicio, [([H|T], Custo)|Resto], L, _) :-		todas_cidades(H, Todas),
 															subtract(Todas, T, Disponivel),
-															%	Se Disponivel está vazio, acabou
+															%	Se Disponivel esta vazio, acabou
 															(Disponivel = [] ->
 																buscalarguraa(Inicio, [([H|T], Custo)|Resto], L, []), !
 
-															% Se disponivel não está vazio, não terminou
+															% Se disponivel não esta vazio, não terminou
 															;
 																expande(Disponivel, ([H|T], Custo), Retorno),
 																append(Resto, Retorno, Expandido),
+																%write_list(["Antes da poda: ", Expandido, "\n"]),
 																poda(Expandido, Nivel),
+																%write_list(["Depois da poda: ", Nivel, "\n\n"]),
 																buscalarguraa(Inicio, Nivel, L, Retorno), !
 															), !.
 
