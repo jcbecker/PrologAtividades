@@ -1,0 +1,6 @@
+aluno(carla,[disc(teoria,'B'),disc(ed2,'A'),disc(alg,'B')]).
+aluno(jose,[disc(distribuida,'B'),disc(teoria,'A'),disc(alg,'A')]).
+aluno(marco,[disc(mata,'A'),disc(ed2,'A'),disc(alg,'A')]).
+professor(padilha,[disc(mata,'A'),disc(matb,'B'),disc(mata,'A')]).
+professor(zatesko,[disc(teoria,'A'),disc(discreta,'A'),disc(grafos,'A')]).
+professor(emilio,[disc(distribuida,'B'),disc(ed2,'A'),disc(alg,'A')]).
